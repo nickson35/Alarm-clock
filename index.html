@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarm clock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root{
+            --bw: 9px;
+        }
+
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            display: grid;
+            place-items: center;
+            background:
+                linear-gradient(to bottom right, #3C4BBD 15%, transparent),
+                radial-gradient(circle at 100% 0%, rgba(255, 255, 255, .2) 10%, transparent 20%) center center / 15px 15px,
+                linear-gradient(to bottom right, #3C4BBD, #57ADD8);
+        }
+
+        .wrapper {
+            position: relative;
+            perspective: 40em;
+            display: grid;
+            transform-style: preserve-3d;
+        }
+
+        .card {
+            grid-area: 1 / 1;
+            height: 200px;
+            width: 400px;
+            transform: translateX(10px) rotateY(25deg) rotateX(10deg);
+            background: rgba(249, 198, 26, 0.88);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 30px;
+            color: #000;
+            text-transform: uppercase;
+            font-size: 60px;
+            font-weight: 900;
+        }
+        
+        .card .enclosed {
+            background: #000;
+            line-height: 1;
+            color: rgba(249, 198, 26, 1);
+            padding: 0 5px;
+            display: inline-block;
+            transform: translate(-1px, 1px) scale(0.75);
+            transform-origin: right center;
+        }
+
+        .wrapper:before {
+            grid-area: 1 / 1;
+            content: '';
+            backface-visibility: hidden;
+            height: 100%;
+            width: 100%;
+            margin-top: calc(-1 * var(--bw));
+            margin-left: calc(-1 * var(--bw));
+            background: transparent;
+            transform: translateX(-60px) rotateY(-30deg) rotateX(15deg) scale(1.03);
+            pointer-events: none;
+            border: var(--bw) solid #000;
+            box-sizing: content-box;
+        }
+
+        .wrapper>div,
+        .wrapper:before {
+            will-change: transform;
+            transition: .3s transform cubic-bezier(.25, .46, .45, 1);
+        }
+
+        .input_controls{
+            width:400px;
+            height:100px;
+            display:flex;
+            flex-direction: column;
+            gap:2rem;
+            align-items: center;
+            margin-top:3rem;
+        }
+
+        #alarmInput{
+            width:100%;
+            text-align: center;
+            font-size:1.4rem;
+            background-color:rgb(116, 116, 116);
+            color:white;
+            border-radius:10px;
+        }
+
+        .btn_container{
+            border-radius:10px;
+            display: flex;
+            gap:4rem;
+        }
+
+        .start,
+        .stop{
+            width:100px;
+            height:30px;
+            padding:0.4rem;
+            border-radius:10px;
+            outline: none;
+            border:none;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="wrapper">
+        <div class="card">
+            <p class="enclosed hours"></p>
+            <p class="enclosed minutes"></p>
+            <p class="enclosed seconds"></p>
+        </div>
+    </div>
+
+    <div class="input_controls">
+        <!-- for chrome -->
+        <input type="datetime-local" type="datetime" value="" id="alarmInput" name="alrmType" onchange="setAlarmTime(value)">
+        <div class="btn_container">
+            <button class="start">Set Alarm</button>
+            <button class="stop">Stop Alarm</button>
+        </div>
+    </div>
+
+    <script>
+        // display variables
+        const timeHours = document.querySelector('.hours');
+        const timeMinutes = document.querySelector('.minutes');
+        const timeSeconds = document.querySelector('.seconds');
+        const audio = new Audio('mess.mp3');
+        audio.loop = true;
+        let alarmTimeout = null;
+
+        let alarmValue = document.getElementById('alarmInput').value
+
+        const start = document.querySelector('.start');
+        const stop = document.querySelector('.stop');
+
+
+
+
+        function updateTime() {
+            // set display Time
+            const date = new Date();
+            const hours = timeAppend(date.getHours());
+            const minutes = timeAppend(date.getMinutes());
+            const seconds = timeAppend(date.getSeconds());
+
+            // const number = 23;
+            // console.log(typeof number.toString());
+
+            const textHours = timeHours.textContent = hours;
+            const textMinutes = timeMinutes.textContent = minutes;
+            const textSeconds = timeSeconds.textContent = seconds;
+        }
+
+        function timeAppend(time) {
+
+            // time < 10 ? + '0' : seconds; 
+            if (time < 10) {
+                return '0' + time;
+            }
+            else {
+                return time;
+            };
+        };
+
+        setInterval(updateTime, 1000);
+
+        // ------- set alarm
+
+        function setAlarmTime(value) {
+            alarmValue = value;
+            console.log(value);
+        }
+
+        start.addEventListener('click', setAlarm);
+
+        function setAlarm() {
+            if (alarmValue) {
+                const current = new Date();
+                const timeToAlarm = new Date(alarmValue)
+                console.log(timeToAlarm);
+
+                if (timeToAlarm > current) {
+                    const timeOut = timeToAlarm.getTime() - current.getTime();
+                    console.log(timeOut);
+
+                    alarmTimeout = setTimeout(function () {
+                        audio.play();
+
+                    }, timeOut);
+                }
+            }
+        }
+        // Clear the alarm
+
+        stop.addEventListener('click', function () {
+            audio.pause();
+
+            if (alarmTimeout) {
+                clearTimeout(alarmTimeout);
+                alert('Wake up Already');
+            }
+        });
+
+
+    </script>
+</body>
+
+</html>
